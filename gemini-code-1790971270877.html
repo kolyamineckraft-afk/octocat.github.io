@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>БАРАХОЛКА МАГНАТ 5.2: Telegram Edition</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800;900&display=swap" rel="stylesheet">
+<!-- Telegram WebApp SDK -->
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root {
+    --bg: #05070f;
+    --card: #0d111d;
+    --card-hover: #141b2c;
+    --line: #1e293b;
+    --muted: #64748b;
+    --blue: #3b82f6;
+    --green: #10b981;
+    --gold: #fbbf24;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+    --color-common: #64748b;
+    --color-uncommon: #10b981;
+    --color-rare: #06b6d4;
+    --color-epic: #a855f7;
+    --color-legendary: #fbbf24;
+}
+* { 
+    box-sizing: border-box; 
+    user-select: none; 
+    -webkit-user-select: none; 
+    font-family: 'Montserrat', sans-serif; 
+    margin: 0; 
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+body { 
+    background: #020306; 
+    color: #f8fafc; 
+    height: 100vh; 
+    overflow: hidden; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+}
+.app { 
+    width: min(480px, 100vw); 
+    height: 100vh; 
+    background: var(--bg); 
+    display: flex; 
+    flex-direction: column; 
+    position: relative; 
+    border-left: 1px solid var(--line); 
+    border-right: 1px solid var(--line); 
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.8); 
+}
+header { 
+    padding: 12px 16px; 
+    background: linear-gradient(135deg, #0b0f19, #0f172a); 
+    border-bottom: 1px solid var(--line); 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    z-index: 10; 
+}
+.label { 
+    font-size: 9px; 
+    color: var(--muted); 
+    text-transform: uppercase; 
+    font-weight: 800; 
+    letter-spacing: 0.05em; 
+}
+.money { 
+    font-size: 18px; 
+    color: var(--green); 
+    font-weight: 900; 
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.25); 
+}
+.stats { 
+    display: flex; 
+    gap: 5px; 
+    align-items: center; 
+}
+.pill { 
+    background: rgba(255, 255, 255, 0.03); 
+    border: 1px solid var(--line); 
+    border-radius: 20px; 
+    padding: 5px 8px; 
+    font-weight: bold; 
+    font-size: 10px; 
+    display: flex; 
+    align-items: center; 
+    gap: 3px; 
+}
+.news-bar { 
+    padding: 6px; 
+    color: #c084fc; 
+    background: #0f0a21; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    font-size: 10px; 
+    font-weight: bold; 
+    border-bottom: 1px solid var(--line); 
+}
+.ticker { 
+    display: inline-block; 
+    padding-left: 100%; 
+    animation: tick 32s linear infinite; 
+}
+@keyframes tick { to { transform: translateX(-100%); } }
+.main { 
+    flex: 1; 
+    overflow-y: auto; 
+    padding: 14px; 
+    -webkit-overflow-scrolling: touch;
+}
+.tab { 
+    display: none; 
+}
+.tab.active { 
+    display: block; 
+}
+.tab-title { 
+    font-weight: 900; 
+    color: var(--muted); 
+    text-transform: uppercase; 
+    margin: 4px 0 12px; 
+    font-size: 11px; 
+    letter-spacing: 0.07em; 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+}
+.list { 
+    display: grid; 
+    gap: 10px; 
+}
+.card { 
+    background: var(--card); 
+    border: 2px solid var(--line); 
+    border-radius: 16px; 
+    padding: 14px; 
+    display: flex; 
+    justify-content: space-between; 
+    gap: 10px; 
+    align-items: center; 
+    position: relative; 
+    transition: all 0.2s ease; 
+}
+.card.common { border-color: var(--color-common); }
+.card.uncommon { border-color: var(--color-uncommon); }
+.card.rare { border-color: var(--color-rare); }
+.card.epic { border-color: var(--color-epic); }
+.card.legendary { 
+    border-color: var(--color-legendary); 
+    box-shadow: 0 0 16px rgba(251, 191, 36, 0.25); 
+}
+.info { 
+    min-width: 0; 
+    display: flex; 
+    gap: 10px; 
+    align-items: center; 
+    flex: 1; 
+}
+.icon { 
+    font-size: 28px; 
+    width: 44px; 
+    text-align: center; 
+}
+.name-block { 
+    min-width: 0; 
+    flex: 1; 
+}
+.name { 
+    font-weight: 800; 
+    font-size: 13px; 
+    white-space: normal; 
+    color: #f8fafc; 
+    line-height: 1.2; 
+}
+.small { 
+    font-size: 10px; 
+    color: var(--muted); 
+    margin-top: 4px; 
+    line-height: 1.3; 
+}
+.rarity-tag { 
+    display: inline-block; 
+    font-size: 8px; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    margin-bottom: 4px; 
+}
+.common .rarity-tag { color: #cbd5e1; background: rgba(100, 116, 139, 0.15); }
+.uncommon .rarity-tag { color: #34d399; background: rgba(16, 185, 129, 0.15); }
+.rare .rarity-tag { color: #22d3ee; background: rgba(6, 182, 212, 0.15); }
+.epic .rarity-tag { color: #d8b4fe; background: rgba(168, 85, 247, 0.15); }
+.legendary .rarity-tag { color: #fbbf24; background: rgba(251, 191, 36, 0.2); }
+
+.btn { 
+    background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+    color: #fff; 
+    padding: 9px 14px; 
+    border-radius: 10px; 
+    font-weight: 800; 
+    font-size: 11px; 
+    white-space: nowrap; 
+    border: none; 
+    transition: background 0.1s, transform 0.1s; 
+    cursor: pointer;
+}
+.btn:active { transform: scale(0.95); }
+.btn.green { background: linear-gradient(135deg, #10b981, #059669); color: #03130e; }
+.btn.purple { background: linear-gradient(135deg, #a855f7, #7c3aed); color: #fff; }
+.btn.gold { background: linear-gradient(135deg, #fbbf24, #d97706); color: #1a1200; }
+.btn.gray { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--line); color: #f8fafc; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bar-bg { 
+    height: 6px; 
+    background: #1e293b; 
+    border-radius: 5px; 
+    overflow: hidden; 
+    margin-top: 8px; 
+}
+.bar-fill { 
+    height: 100%; 
+    background: var(--blue); 
+    width: 0%; 
+}
+.nav { 
+    height: 64px; 
+    border-top: 1px solid var(--line); 
+    display: flex; 
+    background: #090d16; 
+}
+.nav button { 
+    flex: 1; 
+    background: transparent; 
+    color: var(--muted); 
+    font-size: 9px; 
+    font-weight: bold; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    align-items: center; 
+    border: none; 
+    cursor: pointer;
+}
+.nav button.active { 
+    color: #60a5fa; 
+    background: rgba(59, 130, 246, 0.04); 
+}
+.nav b { 
+    font-size: 16px; 
+    display: block; 
+    margin-bottom: 2px; 
+}
+.modal { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(4, 5, 10, 0.98); 
+    z-index: 100; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    padding: 18px; 
+}
+.modal.hide { display: none !important; }
+.modalbox { 
+    width: min(440px, 100%); 
+    max-height: 85vh; 
+    overflow-y: auto; 
+    background: #0d1222; 
+    border: 1px solid #1e293b; 
+    border-radius: 24px; 
+    padding: 24px; 
+    text-align: center; 
+    -webkit-overflow-scrolling: touch;
+}
+.toast { 
+    position: fixed; 
+    left: 50%; 
+    bottom: 80px; 
+    transform: translateX(-50%); 
+    background: #1e293b; 
+    border: 1px solid #475569; 
+    padding: 10px 16px; 
+    border-radius: 14px; 
+    z-index: 200; 
+    font-weight: bold; 
+    font-size: 11px; 
+    animation: toast-anim 2.5s forwards; 
+    pointer-events: none;
+}
+@keyframes toast-anim { 0%, 75% { opacity: 1; } 100% { opacity: 0; } }
+.review-item { 
+    background: #070913; 
+    border: 1px solid var(--line); 
+    border-radius: 14px; 
+    padding: 12px; 
+    margin-top: 8px; 
+    text-align: left; 
+}
+.event-box { 
+    border-left: 4px solid var(--purple); 
+    padding: 14px; 
+    background: #110c26; 
+    border-radius: 14px; 
+    margin-bottom: 12px; 
+    text-align: left; 
+}
+.event-box h3 { margin: 0 0 6px 0; color: #f8fafc; font-size: 14px; }
+.event-box p { margin: 0 0 12px 0; color: #cbd5e1; font-size: 11px; line-height: 1.4; }
+.event-box .choices { display: flex; gap: 8px; }
+.stars { color: var(--gold); letter-spacing: 2px; }
+</style>
+</head>
+<body>
+<div class="app">
+    <!-- Шапка -->
+    <header class="top">
+        <div><div class="label" id="usernameTag">Твой Капитал</div><div class="money" id="money">5 000 ₽</div></div>
+        <div class="stats">
+            <button class="btn gold" style="font-size:9px; padding:5px 8px;" onclick="claimDaily()">🎁 Бонус</button>
+            <div class="pill">🤝 <span id="rep">10</span></div>
+            <div class="pill">⭐ <span id="rating">5.0</span></div>
+        </div>
+    </header>
+    <div class="news-bar"><span class="ticker" id="news">🔥 ОБНОВЛЕНИЕ 5.2: Ежедневные бонусы, кликер-заработка, достижения и Telegram Mini App интеграция!</span></div>
+    
+    <main class="main">
+        <!-- Вкладка: Рынок / Закупки -->
+        <section id="market" class="tab active">
+            <div class="tab-title">⚡ Быстрый Заработок (Тап зона)</div>
+            <div style="background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px; text-align:center; margin-bottom:15px;">
+                <p class="small" style="margin-bottom:10px;">Раздавай флаеры и выполняй мелкие заказы на районе (+15 ₽ за тап)</p>
+                <button class="btn green" style="width:100%; padding:14px; font-size:14px;" onclick="tapEarn()">📦 Кликнуть / Заработать</button>
+            </div>
+
+            <div class="tab-title">📦 Кейс-Опенинг</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:15px">
+                <button class="btn green" onclick="openCase('drop')">📦 Дроп-Бокс (5к)</button>
+                <button class="btn purple" onclick="openCase('hype')">💎 Хайп-Кейс (25к)</button>
+            </div>
+            <div class="tab-title">🔥 Горячие предложения</div>
+            <div id="marketList" class="list"></div>
+        </section>
+
+        <!-- Вкладка: Склад / Объявления -->
+        <section id="stock" class="tab">
+            <div class="tab-title">📦 Твой Склад</div>
+            <div id="stockList" class="list"></div>
+            <div class="tab-title" style="margin-top:24px">📢 Мои лоты на Барахолке</div>
+            <div id="listingList" class="list"></div>
+        </section>
+
+        <!-- Вкладка: События -->
+        <section id="events" class="tab">
+            <div class="tab-title">🎲 События и Тренды</div>
+            <div id="eventsList" class="list"></div>
+        </section>
+
+        <!-- Вкладка: Прокачка -->
+        <section id="upgrades" class="tab">
+            <div class="tab-title">⚡ Навыки ресейлера</div>
+            <div id="upgradeList" class="list"></div>
+            <div class="tab-title" style="margin-top:20px">🏆 Достижения</div>
+            <div id="achievementsList" class="list"></div>
+            <div class="tab-title" style="margin-top:20px">⭐ Отзывы покупателей</div>
+            <div id="reviewsList" class="list"></div>
+        </section>
+
+        <!-- Вкладка: Недвижимость и Гараж -->
+        <section id="garage" class="tab">
+            <div class="tab-title">🏠 Недвижимость (Пассивный доход)</div>
+            <div id="estateList" class="list"></div>
+            <div class="tab-title" style="margin-top:20px">🏎️ Гараж Мечты</div>
+            <div id="garageList" style="display:grid; grid-template-columns:1fr 1fr; gap:10px"></div>
+        </section>
+    </main>
+
+    <nav class="nav">
+        <button class="active" onclick="tab('market', this)"><b>🛒</b>Рынок</button>
+        <button onclick="tab('stock', this)"><b>📦</b>Склад</button>
+        <button onclick="tab('events', this)"><b>🎲</b>События</button>
+        <button onclick="tab('upgrades', this)"><b>⚡</b>Навыки</button>
+        <button onclick="tab('garage', this)"><b>🏠</b>Имущество</button>
+    </nav>
+</div>
+
+<!-- Стартовый экран -->
+<div id="startScreenModal" class="modal">
+    <div class="modalbox">
+        <div style="font-size:60px">🏢🤝📈</div>
+        <h1 style="color:#fbbf24; font-size:22px; margin:10px 0;">БАРАХОЛКА МАГНАТ 5.2</h1>
+        <p style="color:var(--muted); font-size:12px; line-height:1.5; margin-bottom:20px;">
+            Построй империю перепродаж в Телеграме! Зарабатывай на тапах, крути кейсы, скупай элитную недвижимость и гиперкары.
+        </p>
+        <button class="btn green" style="padding:15px 40px; border-radius:30px; font-weight:900;" onclick="beginGame()">НАЧАТЬ ИГРУ</button>
+    </div>
+</div>
+
+<!-- Модалка переговоров -->
+<div id="chat" class="modal hide">
+    <div class="modalbox">
+        <h1 style="font-size:20px; color:#fbbf24;">💬 Торги и Сделка</h1>
+        <div id="chatBody"></div>
+        <div id="chatOptions" style="display:flex; flex-direction:column; gap:8px; margin-top:15px;"></div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+// Интеграция с Telegram WebApp
+let tg = window.Telegram?.WebApp;
+if (tg) {
+    tg.expand();
+    if (tg.initDataUnsafe?.user?.first_name) {
+        document.getElementById('usernameTag').textContent = tg.initDataUnsafe.user.first_name;
+    }
+}
+
+// Web Audio API Synth
+let audioCtx = null;
+function playSound(t){
+    try{
+        if(!audioCtx) audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+        if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+        let o = audioCtx.createOscillator();
+        let g = audioCtx.createGain();
+        o.connect(g); g.connect(audioCtx.destination);
+        if(t==='click'){
+            o.frequency.setValueAtTime(600, audioCtx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(150, audioCtx.currentTime+0.1);
+            g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.1);
+            o.start(); o.stop(audioCtx.currentTime+0.1);
+        } else if(t==='coin'){
+            o.frequency.setValueAtTime(587, audioCtx.currentTime);
+            o.frequency.setValueAtTime(880, audioCtx.currentTime+0.08);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.3);
+            o.start(); o.stop(audioCtx.currentTime+0.3);
+        } else if(t==='case'){
+            o.type='sawtooth';
+            o.frequency.setValueAtTime(100, audioCtx.currentTime);
+            o.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime+0.4);
+            g.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.4);
+            o.start(); o.stop(audioCtx.currentTime+0.4);
+        } else if(t==='fail'){
+            o.type='sawtooth';
+            o.frequency.setValueAtTime(250, audioCtx.currentTime);
+            o.frequency.linearRampToValueAtTime(80, audioCtx.currentTime+0.3);
+            g.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime+0.3);
+            o.start(); o.stop(audioCtx.currentTime+0.3);
+        }
+    }catch(e){}
+}
+
+const R = {
+    common: { n: 'Обычный', m: 0.9 },
+    uncommon: { n: 'Необычный', m: 1.35 },
+    rare: { n: 'Редкий', m: 2.1 },
+    epic: { n: 'Эпический', m: 4.2 },
+    legendary: { n: 'Легендарный', m: 8 }
+};
+
+const brands = ['Nikey','Svuosh','Fruit','Samgong','Poma','Abibas','Gravel Island','Supreme-ish','Lolex','Guccy','Balencgaga','Margela','Prana','Jordan','Vans','NewB','Stone','Carhartt','Off-White-ish','Yeezy-ish','Palm-ish','Vetements-ish','Chrome-Hearts','Casablanca','Prada-ish','Dior-ish','Moncler-ish','Rolex-ish','Apple-ish','Sony-ish'];
+const forms = ['Худи','Футболка','Кроссовки','Куртка','Карго','Джинсы','Свитшот','Рюкзак','Часы','Смартфон','Планшет','Консоль','Ноутбук','Кепка','Ботинки','Ремень','Очки','Пуховик','Жилетка','Перчатки','Кеды','Кольцо','Браслет','Наушники','Монитор'];
+const mods = ['Black','White','Neon','Vintage','Reflective','Gold','Cyber','Limited','Acid','Camo','Metal','Carbon','Distressed','Oversized','Liquid','Diamond','Galactic','Cyberpunk','Grunge','Rainbow'];
+const icons = ['👕','👟','🧥','🎒','⌚','📱','🎮','💻','🎧','🕶️'];
+
+const achievementsDb = [
+    { id: 'first_10k', title: 'Первый кэш', desc: 'Накопить 10 000 ₽', check: s => s.money >= 10000, reward: 2500 },
+    { id: 'rich_100k', title: 'Делец', desc: 'Накопить 100 000 ₽', check: s => s.money >= 100000, reward: 15000 },
+    { id: 'penthouse', title: 'Власник Сити', desc: 'Купить Пентхаус в Сити', check: s => s.estate.includes('e3'), reward: 50000 },
+    { id: 'hypercar', title: 'Скорость света', desc: 'Купить Ламбу или Фантом', check: s => s.cars.includes('c5') || s.cars.includes('c6'), reward: 100000 }
+];
+
+const eventsData = [
+    { id: 'tax', t: '🚨 Рейд Налоговой', d: 'Налоговая инспекция проверила счета. Заплатить 5,000 ₽ или потерять 4 репутации?', f1: s => { s.money = Math.max(0, s.money - 5000); }, f2: s => { s.rep = Math.max(0, s.rep - 4); }, opt1: 'Заплатить (-5к)', opt2: 'Уйти в тень (-4 реп)' },
+    { id: 'gold_rush', t: '💰 Лихорадка Роскоши', d: 'В соцсетях тренд на элитные часы и золото! Цены товаров взлетают.', f1: s => { s.marketBoost = 1.6; }, f2: s => {}, opt1: 'Круто!', opt2: 'Понятно' },
+    { id: 'blogger', t: '📈 Обзор Блогера', d: 'Популярный блогер упомянул твой профиль. Твоя репутация и рейтинг выросли!', f1: s => { s.rep += 3; s.rating = Math.min(5, s.rating + 0.3); }, f2: s => {}, opt1: 'Кайф!', opt2: 'Супер' }
+];
+
+const estateDb = [
+    { id: 'e1', n: 'Бабушкин Вариант', desc: 'Хрущевка под сдачу.', p: 50000, r: 150, ic: '🏚️' },
+    { id: 'e2', n: 'Студия', desc: 'Уютная квартира в центре.', p: 250000, r: 1200, ic: '🏢' },
+    { id: 'e3', n: 'Пентхаус в Сити', desc: 'Элитный район и панорама.', p: 2000000, r: 15000, ic: '🏙️' },
+    { id: 'e4', n: 'Элитный Особняк', desc: 'Особняк с бассейном.', p: 10000000, r: 90000, ic: '🏰' },
+    { id: 'e5', n: 'Завод Ресейла', desc: 'Цех сортировки шмота.', p: 50000000, r: 500000, ic: '🏭' },
+    { id: 'e6', n: 'Небоскреб Магната', desc: 'Целое здание вашего бренда.', p: 1000000000, r: 15000000, ic: '🌇' }
+];
+
+const garageDb = [
+    { id: 'c1', ic: '🚲', n: 'Гоночный Велик', p: 25000 },
+    { id: 'c2', ic: '🚗', n: 'Девятка Четкая', p: 150000 },
+    { id: 'c3', ic: '🏎️', n: 'Бэха Тройка', p: 1200000 },
+    { id: 'c4', ic: '🚙', n: 'Порш 911', p: 8000000 },
+    { id: 'c5', ic: '🛸', n: 'Ламба Хуракан', p: 30000000 },
+    { id: 'c6', ic: '👑', n: 'Люкс Фантом Z', p: 100000000 }
+];
+
+const buyers = [
+    { n: 'Лёха Темщик', a: '😎', templates: { cheap: 'Здорова! Заберу за копейки прямо сейчас...', normal: 'Бро привет, давай заберу, уступи немного...' } },
+    { n: 'Даня Хайпбист', a: '👾', templates: { cheap: 'Ого, цена сок! Забираю...', normal: 'Йоу, шмот зачетный, скинь сотку на дошик!' } },
+    { n: 'Марина Ивановна', a: '👱‍♀️', templates: { cheap: 'Здравствуйте, сыну в подарок возьму...', normal: 'Добрый день, а сделаете скидку на проезд?' } }
+];
+
+let db = [], offers = [], chatIdx = 0, activeEvent = null;
+let s = {
+    money: 5000, rep: 10, rating: 5, storage: 5,
+    inv: [], listings: [], reviews: [], achievements: [],
+    up: { trade: 1, ads: 1, warehouse: 1, charisma: 1 },
+    cars: [], estate: [], discount: 1, marketBoost: 1, lastBonus: 0
+};
+
+function buildDB() {
+    db = [];
+    let id = 0;
+    for (let b of brands) {
+        for (let f of forms) {
+            for (let c of mods) {
+                db.push({
+                    id: id++, name: `${b} ${f} ${c}`,
+                    base: (f.includes('Смарт') || f.includes('Ноут') ? 35000 : f.includes('Крос') || f.includes('Курт') ? 7000 : 2500) * (['Lolex', 'Guccy', 'Balencgaga'].includes(b) ? 2.5 : 1),
+                    icon: icons[id % icons.length]
+                });
+            }
+        }
+    }
+}
+
+function getRar() {
+    let x = Math.random() * 100;
+    return x < 1 ? 'legendary' : x < 5 ? 'epic' : x < 15 ? 'rare' : x < 40 ? 'uncommon' : 'common';
+}
+
+function fmt(n) { return Math.floor(n).toLocaleString('ru-RU'); }
+
+function toast(t) {
+    const active = document.querySelector('.toast');
+    if (active) active.remove();
+    let d = document.createElement('div');
+    d.className = 'toast';
+    d.textContent = t;
+    document.body.appendChild(d);
+    setTimeout(() => d.remove(), 2500);
+}
+
+function save() {
+    localStorage.setItem('m_save_v5_2', JSON.stringify(s));
+}
+
+function claimDaily() {
+    let now = Date.now();
+    if (now - s.lastBonus < 86400000) {
+        return toast('⏳ Ежедневный бонус уже получен! Жди 24 часа.');
+    }
+    s.lastBonus = now;
+    s.money += 10000;
+    playSound('coin');
+    save();
+    ui();
+    toast('🎁 Ежедневный бонус +10 000 ₽ получен!');
+}
+
+function tapEarn() {
+    playSound('click');
+    s.money += 15;
+    ui();
+    save();
+}
+
+function genMarket() {
+    offers = [];
+    for (let i = 0; i < 5; i++) {
+        let x = { ...db[Math.floor(Math.random() * db.length)], rarity: getRar() };
+        let costMod = s.discount * (1 - (s.up.trade - 1) * 0.035);
+        x.price = Math.max(100, Math.floor(x.base * R[x.rarity].m * s.marketBoost * costMod * (0.85 + Math.random() * 0.3)));
+        offers.push(x);
+    }
+    renderMarket();
+}
+
+function renderMarket() {
+    const list = document.getElementById('marketList');
+    if (!list) return;
+    list.innerHTML = offers.map((o, i) => {
+        let r = R[o.rarity];
+        let profit = Math.floor(o.base * r.m * 1.55 - o.price);
+        return `
+        <div class="card ${o.rarity}">
+            <div class="info">
+                <div class="icon">${o.icon}</div>
+                <div class="name-block">
+                    <span class="rarity-tag">${r.n}</span>
+                    <div class="name">${o.name}</div>
+                    <div class="small">Цена: <b style="color:#fbbf24">${fmt(o.price)} ₽</b> | Прибыль: <b style="color:#10b981">+${fmt(Math.max(0, profit))} ₽</b></div>
+                </div>
+            </div>
+            <button class="btn" onclick="buy(${i})">Купить</button>
+        </div>`;
+    }).join('');
+}
+
+function buy(i) {
+    let o = offers[i];
+    if (s.money < o.price) return toast('Недостаточно денег!');
+    if (s.inv.length >= s.storage) return toast('Склад забит!');
+    playSound('click');
+    s.money -= o.price;
+    s.inv.push({ ...o, purchase: o.price });
+    genMarket();
+    ui();
+    save();
+}
+
+function openCase(t) {
+    let cost = t === 'drop' ? 5000 : 25000;
+    if (s.money < cost) { playSound('fail'); return toast('Недостаточно денег для кейса!'); }
+    if (s.inv.length >= s.storage) { playSound('fail'); return toast('Склад забит!'); }
+    playSound('case');
+    s.money -= cost;
+    let r = t === 'drop' ? (Math.random() < 0.1 ? 'legendary' : Math.random() < 0.3 ? 'epic' : 'rare') : (Math.random() < 0.25 ? 'legendary' : 'epic');
+    let item = { ...db[Math.floor(Math.random() * db.length)], rarity: r, purchase: Math.floor(cost * 0.8) };
+    s.inv.push(item);
+    ui();
+    save();
+    alert(`🎉 Тебе выпало:\n[${R[r].n}] ${item.name}!`);
+}
+
+function renderStock() {
+    const sList = document.getElementById('stockList');
+    if (sList) {
+        sList.innerHTML = s.inv.length ? s.inv.map((x, i) => `
+            <div class="card ${x.rarity}">
+                <div class="info">
+                    <div class="icon">${x.icon}</div>
+                    <div class="name-block">
+                        <span class="rarity-tag">${R[x.rarity].n}</span>
+                        <div class="name">${x.name}</div>
+                        <div class="small">Закупка: ${fmt(x.purchase)} ₽</div>
+                    </div>
+                </div>
+                <button class="btn" onclick="listIt(${i})">Выставить</button>
+            </div>`).join('') : '<div class="small" style="text-align:center; padding:15px;">Склад пуст.</div>';
+    }
+
+    const lList = document.getElementById('listingList');
+    if (lList) {
+        lList.innerHTML = s.listings.length ? s.listings.map((x, i) => `
+            <div class="card ${x.item.rarity}">
+                <div class="info">
+                    <div class="icon">${x.item.icon}</div>
+                    <div class="name-block">
+                        <div class="name">${x.item.name}</div>
+                        <div class="small">Цена: ${fmt(x.sell)} ₽</div>
+                        <div class="bar-bg"><div class="bar-fill" id="bar-${i}" style="width:${x.progress}%"></div></div>
+                    </div>
+                </div>
+                <div>${x.progress >= 100 ? `<button class="btn" onclick="openChat(${i})">Чат</button>` : `<button class="btn gray" style="font-size:9px;" onclick="boostListing(${i})">⚡ Ускорить</button>`}</div>
+            </div>`).join('') : '<div class="small" style="text-align:center; padding:15px;">Нет активных объявлений.</div>';
+    }
+}
+
+function boostListing(i) {
+    if (s.listings[i] && s.listings[i].progress < 100) {
+        playSound('click');
+        s.listings[i].progress = Math.min(100, s.listings[i].progress + 25);
+        renderStock();
+        save();
+    }
+}
+
+function listIt(i) {
+    let x = s.inv[i];
+    let suggest = Math.floor(x.base * R[x.rarity].m * 1.55);
+    let p = parseInt(prompt(`За какую цену выставишь лот?\n(Рекомендуется: ${fmt(suggest)} ₽):`, suggest));
+    if (!p || p < 1) return;
+    s.inv.splice(i, 1);
+    let b = buyers[Math.floor(Math.random() * buyers.length)];
+    s.listings.push({ item: x, sell: p, progress: 0, buyer: b.n, avatar: b.a });
+    ui();
+    save();
+}
+
+function openChat(i) {
+    chatIdx = i;
+    let l = s.listings[i];
+    let buyerObj = buyers.find(b => b.n === l.buyer) || buyers[0];
+    document.getElementById('chat').classList.remove('hide');
+    document.getElementById('chatBody').innerHTML = `<div class="review-item"><b>${l.avatar} ${l.buyer}</b><br><span class="small">«${buyerObj.templates.normal}»</span></div>`;
+    document.getElementById('chatOptions').innerHTML = `
+        <button class="btn" onclick="deal(0.9)">Уступить 10%</button>
+        <button class="btn gray" onclick="deal(1.0)">Без скидки</button>
+        <button class="btn gray" style="color:var(--red)" onclick="cancelDeal()">Отменить</button>`;
+}
+
+function deal(m) {
+    let l = s.listings[chatIdx];
+    playSound('coin');
+    s.money += Math.floor(l.sell * m);
+    s.rep++;
+    s.listings.splice(chatIdx, 1);
+    save();
+    ui();
+    document.getElementById('chat').classList.add('hide');
+    toast('Сделка успешна!');
+}
+
+function cancelDeal() {
+    s.inv.push(s.listings[chatIdx].item);
+    s.listings.splice(chatIdx, 1);
+    save();
+    ui();
+    document.getElementById('chat').classList.add('hide');
+}
+
+function renderAchievements() {
+    const list = document.getElementById('achievementsList');
+    if (!list) return;
+    list.innerHTML = achievementsDb.map(a => {
+        let done = s.achievements.includes(a.id);
+        let canClaim = !done && a.check(s);
+        return `
+        <div class="card">
+            <div class="info">
+                <div class="icon">🏆</div>
+                <div class="name-block">
+                    <div class="name">${a.title}</div>
+                    <div class="small">${a.desc} (+${fmt(a.reward)} ₽)</div>
+                </div>
+            </div>
+            <button class="btn ${done?'gray':canClaim?'green':'gray'}" ${done||!canClaim?'disabled':''} onclick="claimAch('${a.id}', ${a.reward})">${done?'ПОЛУЧЕНО':canClaim?'ЗАБРАТЬ':'ЗАКРЫТО'}</button>
+        </div>`;
+    }).join('');
+}
+
+function claimAch(id, reward) {
+    s.achievements.push(id);
+    s.money += reward;
+    playSound('coin');
+    ui();
+    save();
+    toast(`Награда получена: +${fmt(reward)} ₽!`);
+}
+
+function renderUp() {
+    const list = document.getElementById('upgradeList');
+    if (!list) return;
+    let upData = [
+        ['trade', 'Мастер торга', 'Скидка на закупку 3.5%', 1500, '🤝'],
+        ['ads', 'Реклама', 'Ускорение поиска клиентов', 1300, '📢'],
+        ['warehouse', 'Склад', '+2 места на склад', 2500, '📦']
+    ];
+    list.innerHTML = upData.map(([id, n, d, cost, icon]) => `
+        <div class="card">
+            <div class="info">
+                <div class="icon">${icon}</div>
+                <div class="name-block"><div class="name">${n} (Lvl ${s.up[id]})</div><div class="small">${d}</div></div>
+            </div>
+            <button class="btn" onclick="buyUp('${id}', ${cost})">${fmt(cost * s.up[id])} ₽</button>
+        </div>`).join('');
+}
+
+function buyUp(id, c) {
+    let cost = c * s.up[id];
+    if (s.money < cost) return toast('Нужно больше денег!');
+    playSound('coin');
+    s.money -= cost;
+    s.up[id]++;
+    if (id === 'warehouse') s.storage += 2;
+    ui();
+    save();
+}
+
+function renderEstate() {
+    document.getElementById('estateList').innerHTML = estateDb.map(e => `
+        <div class="card">
+            <div class="info">
+                <div class="icon">${e.ic}</div>
+                <div class="name-block"><div class="name">${e.n}</div><div class="small">${e.desc}<br>Доход: +${fmt(e.r)} ₽/сек</div></div>
+            </div>
+            <button class="btn ${s.estate.includes(e.id)?'gray':'green'}" onclick="buyEst('${e.id}', ${e.p})">${s.estate.includes(e.id)?'КУПЛЕНО':fmt(e.p)+' ₽'}</button>
+        </div>`).join('');
+}
+
+function buyEst(id, p) {
+    if (s.estate.includes(id) || s.money < p) return toast('Недоступно!');
+    playSound('coin');
+    s.money -= p;
+    s.estate.push(id);
+    ui();
+    save();
+}
+
+function renderGarage() {
+    document.getElementById('garageList').innerHTML = garageDb.map(c => `
+        <div class="card">
+            <div class="icon">${c.ic}</div>
+            <div class="name" style="font-size:11px">${c.n}</div>
+            <div class="small" style="color:var(--gold)">${s.cars.includes(c.id)?'КУПЛЕНО':fmt(c.p)+' ₽'}</div>
+            ${s.cars.includes(c.id)?'':`<button class="btn green" style="width:100%; margin-top:6px; font-size:10px" onclick="buyCar('${c.id}',${c.p})">Купить</button>`}
+        </div>`).join('');
+}
+
+function buyCar(id, p) {
+    if (s.cars.includes(id) || s.money < p) return toast('Недоступно!');
+    playSound('coin');
+    s.money -= p;
+    s.cars.push(id);
+    ui();
+    save();
+    toast('Машина добавлена в гараж!');
+}
+
+function tab(id, el) {
+    playSound('click');
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    document.querySelectorAll('.nav button').forEach(x => x.classList.remove('active'));
+    if (el) el.classList.add('active');
+    ui();
+}
+
+function ui() {
+    document.getElementById('money').textContent = fmt(s.money) + ' ₽';
+    document.getElementById('rep').textContent = s.rep;
+    document.getElementById('rating').textContent = s.rating.toFixed(1);
+    
+    let active = document.querySelector('.tab.active').id;
+    if (active === 'market') renderMarket();
+    if (active === 'stock') renderStock();
+    if (active === 'upgrades') { renderUp(); renderAchievements(); }
+    if (active === 'garage') { renderEstate(); renderGarage(); }
+}
+
+function beginGame() {
+    playSound('click');
+    document.getElementById('startScreenModal').classList.add('hide');
+    buildDB();
+    let old = localStorage.getItem('m_save_v5_2');
+    if (old) { try { s = { ...s, ...JSON.parse(old) }; } catch(e){} }
+    ui();
+    genMarket();
+
+    setInterval(() => {
+        // Пассивный доход
+        s.estate.forEach(id => {
+            let e = estateDb.find(x => x.id === id);
+            if (e) s.money += e.r;
+        });
+
+        // Поиск клиентов
+        s.listings.forEach((x, i) => {
+            if (x.progress < 100) {
+                x.progress = Math.min(100, x.progress + (5 + 3 * s.up.ads));
+                let b = document.getElementById(`bar-${i}`);
+                if (b) b.style.width = x.progress + '%';
+            }
+        });
+
+        // Случайные события
+        if (!activeEvent && Math.random() < 0.05) {
+            activeEvent = eventsData[Math.floor(Math.random() * eventsData.length)];
+            toast(`🎲 Событие: ${activeEvent.t}`);
+        }
+
+        ui();
+    }, 1000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {});
+</script>
+</body>
+</html>
